@@ -1,6 +1,6 @@
 {
-  "name": "La meva App",
-  "short_name": "App",
+  "name": "SieteApp",
+  "short_name": "SieteApp",
   "start_url": "/SieteApp/",
   "scope": "/SieteApp/",
   "display": "standalone",
