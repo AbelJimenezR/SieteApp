@@ -1,7 +1,7 @@
 {
   "name": "InmoApp",
   "short_name": "App",
-  "start_url": "inmoapp.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
