@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>InmoApp</title>
+  <link rel="manifest" href="manifest.webmanifest">
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
 <style>
 :root{
   --bg:#f0f4f8;--card:#fff;--tx:#1a2535;--mu:#6b7a90;--pri:#1767d1;
