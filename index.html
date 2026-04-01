@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>InmoApp</title>
-  <link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest">
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
@@ -124,21 +124,78 @@ tr:last-child td{border-bottom:none}
 .alert-item:last-child{border-bottom:none}
 .alert-dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex-shrink:0}
 
-/* NAV */
-footerbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--br);box-shadow:0 -2px 12px rgba(0,0,0,.07);z-index:30;height:70px}
-.nav{max-width:700px;margin:0 auto;display:flex;justify-content:space-around;padding:6px 4px 8px;height:100%}
-.nav button{flex:1;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-radius:10px;padding:4px}
+/* NAV — mòbil (bottom bar) */
+footerbar{
+  position:fixed;left:0;right:0;bottom:0;
+  background:#fff;border-top:1px solid var(--br);
+  box-shadow:0 -2px 12px rgba(0,0,0,.07);
+  z-index:30;height:70px;
+}
+.nav{
+  max-width:700px;margin:0 auto;
+  display:flex;justify-content:space-around;
+  padding:6px 4px 8px;height:100%;
+}
+.nav button{
+  flex:1;border:none;background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;border-radius:10px;padding:4px;
+}
 .nav button .nicon{font-size:20px;line-height:1}
 .nav button .nlabel{font-size:10px;font-weight:700;color:var(--mu)}
 .nav button.on .nlabel{color:var(--pri)}
 .nav button.on{background:#eef4ff}
+
+/* NAV — desktop (sidebar) */
 @media(min-width:701px){
-  footerbar{position:sticky;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--br);box-shadow:0 2px 12px rgba(0,0,0,.07);height:auto;order:-1}
-  .nav{max-width:700px;padding:6px 8px}
-  .nav button{flex-direction:row;gap:6px;padding:8px 12px;flex:none}
-  .nav button .nicon{font-size:16px}
-  .nav button .nlabel{font-size:12px;color:var(--tx)}
+  body{display:flex;flex-direction:row}
+
+  footerbar{
+    position:fixed;left:0;top:0;bottom:0;right:auto;
+    width:220px;height:100dvh;
+    border-top:none;border-right:1px solid var(--br);
+    box-shadow:2px 0 16px rgba(0,0,0,.06);
+    background:#fff;
+    display:flex;flex-direction:column;
+    z-index:30;
+  }
+  .sidebar-logo{
+    display:flex;align-items:center;gap:10px;
+    padding:18px 16px 16px;
+    background:linear-gradient(135deg,#0f2a4d,#1e4d8c);
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  .sidebar-logo-icon{font-size:22px}
+  .sidebar-logo-text{font-size:15px;font-weight:900;color:#fff;line-height:1.2}
+  .sidebar-logo-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+
+  .nav{
+    flex-direction:column;justify-content:flex-start;align-items:stretch;
+    padding:12px 10px;gap:2px;height:auto;flex:1;
+    max-width:none;margin:0;
+  }
+  .nav button{
+    flex:none;flex-direction:row;justify-content:flex-start;
+    gap:10px;padding:10px 12px;border-radius:10px;width:100%;
+    transition:background .15s;
+  }
+  .nav button .nicon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+  .nav button .nlabel{font-size:13px;font-weight:700;color:#4a5568}
+  .nav button.on{background:#eef4ff}
   .nav button.on .nlabel{color:var(--pri)}
+  .nav button:hover:not(.on){background:#f8fafc}
+
+  /* contingut principal desplaçat a la dreta de la sidebar */
+  #appScreen{
+    margin-left:220px;
+    flex:1;
+    display:flex;flex-direction:column;
+    min-height:100dvh;
+    min-width:0;
+  }
+  header{position:sticky;top:0}
+  .hinner{max-width:none;padding:12px 24px 10px}
+  main{max-width:none;padding:16px 24px 40px}
 }
 
 /* MODAL */
@@ -302,6 +359,13 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
   </main>
 
   <footerbar>
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-icon">🏠</span>
+      <div>
+        <div class="sidebar-logo-text">InmoApp</div>
+        <div class="sidebar-logo-sub">Gestión de alquileres</div>
+      </div>
+    </div>
     <div class="nav">
       <button class="on" onclick="goTo('page-kpis',this)"><span class="nicon">📊</span><span class="nlabel">Resumen</span></button>
       <button onclick="goTo('page-inmuebles',this)"><span class="nicon">🏢</span><span class="nlabel">Inmuebles</span></button>
@@ -408,19 +472,14 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ══════════════════════════════════════
-// ⚙️  CONFIGURACIÓN — CAMBIA ESTOS VALORES
-// ══════════════════════════════════════
 const SUPABASE_URL = 'https://difgwfrklhqkmzifsiax.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmd3ZnJrbGhxa216aWZzaWF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDI4MDYsImV4cCI6MjA5MDQ3ODgwNn0.cBcfUzrK7r7mhLxF_R3FldpU5o3j8g2Bgmdss8Gxn2g';
-// ══════════════════════════════════════
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const hoy = new Date();
 const ymActual = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
 let D = { inmuebles:[], inquilinos:[], cobros:[], gastos:[] };
 
-// ── UTILS ──
 function euro(n){ return (Number(n)||0).toFixed(2).replace('.',',')+' €'; }
 function badge(s){
   if(['Pagado','Vigente','Alquilado','Disponible'].includes(s)) return `<span class="badge b-ok">${s}</span>`;
@@ -442,7 +501,6 @@ function goTo(id, btn){
   if(page){ page.style.display='block'; window.scrollTo(0,0); }
 }
 
-// ── AUTH UI ──
 function switchTab(tab){
   document.getElementById('loginForm').style.display = tab==='login' ? '' : 'none';
   document.getElementById('registerForm').style.display = tab==='register' ? '' : 'none';
@@ -474,7 +532,6 @@ function showApp(email){
   document.getElementById('avatarInitial').textContent=(email[0]||'?').toUpperCase();
 }
 
-// ── AUTH ACTIONS ──
 async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
@@ -496,7 +553,6 @@ async function doLogout(){
   showLogin();
 }
 
-// ── AUTH STATE ──
 sb.auth.onAuthStateChange((event, session)=>{
   if(event==='SIGNED_IN' && session && session.user){
     showApp(session.user.email||'');
@@ -506,7 +562,6 @@ sb.auth.onAuthStateChange((event, session)=>{
   }
 });
 
-// ── DATA ──
 async function loadAll(){
   const [inm,inq,cob,gas] = await Promise.all([
     sb.from('inmuebles').select('*').order('id'),
@@ -521,7 +576,6 @@ async function loadAll(){
   render();
 }
 
-// ── RENDER ──
 function render(){
   const alquilados = D.inmuebles.filter(x=>x.estado==='Alquilado').length;
   const rentaMes = D.inquilinos.reduce((a,b)=>a+Number(b.renta||0), 0);
@@ -647,14 +701,12 @@ function render(){
     : `<div style="font-size:13px;color:var(--mu);padding:4px 0">✅ Sin alertas pendientes.</div>`;
 }
 
-// ── MODALS ──
-let editingId = null; // ID del registre que s'està editant (null = nou)
+let editingId = null;
 
 function editInmueble(id){
   const im = D.inmuebles.find(x=>x.id===id);
   if(!im) return;
   editingId = id;
-  const selInm = D.inmuebles.map(x=>`<option value="${x.id}">${x.direccion}</option>`).join('');
   document.getElementById('f_tipo').value = im.tipo;
   document.getElementById('f_estado').value = im.estado;
   document.getElementById('f_direccion').value = im.direccion;
@@ -714,6 +766,7 @@ async function deleteItem(tabla, id){
   await loadAll();
   showToast('✅ Eliminado correctamente');
 }
+
 function openModal(tipo){
   editingId = null;
   const selInm = D.inmuebles.map(x=>`<option value="${x.id}">${x.direccion}</option>`).join('');
@@ -752,7 +805,6 @@ function openModal(tipo){
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ── SAVE ──
 async function saveInmueble(){
   const row={
     tipo: document.getElementById('f_tipo').value,
@@ -834,7 +886,6 @@ async function toggleCobro(id, estadoActual){
   await loadAll();
 }
 
-// ── EXPORT ──
 function exportCSV(){
   const lines=['TIPO;ID;DATOS'];
   D.inmuebles.forEach(x=>lines.push(`INMUEBLE;${x.id};${x.tipo}|${x.direccion}|${x.poblacion}|${x.estado}|${x.alquiler}|${x.precio_compra}`));
@@ -849,7 +900,6 @@ function exportCSV(){
   showToast('✅ CSV exportado');
 }
 
-// Tanca modal clicant fora
 document.querySelectorAll('.modal-bg').forEach(bg=>{
   bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
 });
