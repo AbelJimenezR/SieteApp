@@ -132,6 +132,14 @@ footerbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px 
 .nav button .nlabel{font-size:10px;font-weight:700;color:var(--mu)}
 .nav button.on .nlabel{color:var(--pri)}
 .nav button.on{background:#eef4ff}
+@media(min-width:701px){
+  footerbar{position:sticky;top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--br);box-shadow:0 2px 12px rgba(0,0,0,.07);height:auto;order:-1}
+  .nav{max-width:700px;padding:6px 8px}
+  .nav button{flex-direction:row;gap:6px;padding:8px 12px;flex:none}
+  .nav button .nicon{font-size:16px}
+  .nav button .nlabel{font-size:12px;color:var(--tx)}
+  .nav button.on .nlabel{color:var(--pri)}
+}
 
 /* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;align-items:flex-end;justify-content:center}
@@ -159,7 +167,6 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
 .empty{background:var(--card);border:1px solid var(--br);border-radius:16px;padding:16px;color:var(--mu);font-size:13px;margin-bottom:10px}
 
 @media(max-width:500px){.form{grid-template-columns:1fr}}
-@media(min-width:701px){footerbar{display:none}}
 </style>
 </head>
 <body>
