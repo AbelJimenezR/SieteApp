@@ -1,7 +1,7 @@
 {
   "name": "SieteApp",
   "short_name": "SieteApp",
-  "start_url": "/SieteApp/",
+  "start_url": "/SieteApp/index.html",
   "scope": "/SieteApp/",
   "display": "standalone",
   "background_color": "#ffffff",
