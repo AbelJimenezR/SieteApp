@@ -21,9 +21,25 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
 
+/* SPLASH — pantalla de càrrega inicial */
+#splashScreen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100dvh;
+  background:linear-gradient(135deg,#0f2a4d,#184a7a);
+  flex-direction:column;gap:16px;
+}
+#splashScreen .spin{
+  width:32px;height:32px;
+  border:3px solid rgba(255,255,255,.2);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+#splashScreen p{color:rgba(255,255,255,.5);font-size:13px;margin:0}
+
 /* AUTH */
 #authScreen{
-  display:flex;align-items:center;justify-content:center;
+  display:none;align-items:center;justify-content:center;
   min-height:100dvh;padding:20px;
   background:linear-gradient(135deg,#0f2a4d,#184a7a);
 }
@@ -197,6 +213,15 @@ footerbar{
   header{position:sticky;top:0}
   .hinner{max-width:none;padding:12px 24px 10px}
   main{max-width:none;padding:16px 24px 40px}
+
+  /* KPIs en 3 columnes a desktop */
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+
+  /* Gràfics costat a costat */
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+  /* Taules i cards aprofiten l'amplada */
+  .tcard table{min-width:0}
 }
 
 /* MODAL */
@@ -225,9 +250,48 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
 .empty{background:var(--card);border:1px solid var(--br);border-radius:16px;padding:16px;color:var(--mu);font-size:13px;margin-bottom:10px}
 
 @media(max-width:500px){.form{grid-template-columns:1fr}}
+
+/* FILTRES IMMOBLES */
+.filter-bar{margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.filter-search-wrap{position:relative}
+.filter-search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.filter-search{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none}
+.filter-search:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(23,103,209,.1)}
+.filter-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filter-chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--br);background:#fff;color:var(--mu);border-radius:999px;padding:5px 12px;font:600 12px system-ui;cursor:pointer;white-space:nowrap;transition:all .15s}
+.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.filter-count{font-size:11px;color:var(--mu);margin-bottom:6px}
+
+/* GRÀFICS */
+.chart-card{background:var(--card);border:1px solid var(--br);border-radius:16px;padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.chart-title{font-size:13px;font-weight:800;color:var(--tx)}
+.chart-range{display:flex;gap:4px}
+.chart-range button{border:1px solid var(--br);background:#fff;color:var(--mu);border-radius:8px;padding:4px 10px;font:600 11px system-ui;cursor:pointer}
+.chart-range button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.chart-wrap{position:relative;height:200px}
+
+/* DOCUMENTS */
+.doc-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9}
+.doc-item:last-child{border-bottom:none}
+.doc-icon{width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-size:11px;color:var(--mu);margin-top:2px}
+.upload-area{border:2px dashed var(--br);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:4px}
+.upload-area:hover{border-color:var(--pri)}
+.upload-area input{display:none}
+.upload-area p{margin:6px 0 0;font-size:12px;color:var(--mu)}
 </style>
 </head>
 <body>
+
+<!-- SPLASH — pantalla de càrrega mentre Supabase comprova la sessió -->
+<div id="splashScreen">
+  <div class="spin"></div>
+  <p>Cargando...</p>
+</div>
 
 <!-- LOGIN -->
 <div id="authScreen">
@@ -299,6 +363,7 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
         <button class="hbtn azul" onclick="openModal('inquilino')">👤 Inquilino</button>
         <button class="hbtn azul" onclick="openModal('cobro')">💰 Cobro</button>
         <button class="hbtn azul" onclick="openModal('gasto')">🔧 Gasto</button>
+        <button class="hbtn azul" onclick="generarCobrosMes()">⚡ Generar cobros</button>
         <button class="hbtn amarillo" onclick="exportCSV()">📤 Exportar</button>
       </div>
     </div>
@@ -314,23 +379,104 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
         <div class="kpi-card"></div><div class="kpi-card"></div>
         <div class="kpi-card"></div>
       </div>
+
+      <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title">📈 Evolución mensual</span>
+          <div class="chart-range" id="range-evol">
+            <button class="on" data-m="6" onclick="setChartRange('evol',6,this)">6m</button>
+            <button data-m="12" onclick="setChartRange('evol',12,this)">12m</button>
+            <button data-m="0" onclick="setChartRange('evol',0,this)">Todo</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartEvol"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title">🏢 Rendibilidad por inmueble</span>
+          <div class="chart-range" id="range-inm">
+            <button class="on" data-m="6" onclick="setChartRange('inm',6,this)">6m</button>
+            <button data-m="12" onclick="setChartRange('inm',12,this)">12m</button>
+            <button data-m="0" onclick="setChartRange('inm',0,this)">Todo</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartInm"></canvas></div>
+      </div>
+      </div>
     </div>
 
     <!-- PÀGINA: INMUEBLES -->
     <div class="page" id="page-inmuebles" style="display:none">
       <div class="sec-title">Inmuebles</div>
+      <div class="filter-bar">
+        <div class="filter-search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="filter-search" id="flt-texto" type="search" placeholder="Buscar por dirección o población…" oninput="renderInmuebles()">
+        </div>
+        <div class="filter-chips" id="chips-estado">
+          <button class="chip on" data-val="" onclick="setChip('estado','',this)">Todos</button>
+          <button class="chip" data-val="Disponible" onclick="setChip('estado','Disponible',this)">🟢 Disponible</button>
+          <button class="chip" data-val="Alquilado" onclick="setChip('estado','Alquilado',this)">🔵 Alquilado</button>
+        </div>
+        <div class="filter-chips" id="chips-tipo">
+          <button class="chip on" data-val="" onclick="setChip('tipo','',this)">Todos</button>
+        </div>
+      </div>
+      <div class="filter-count" id="flt-count"></div>
       <div id="inmuebles"><div class="loading"><div class="spin"></div> Cargando...</div></div>
     </div>
 
     <!-- PÀGINA: INQUILINOS -->
     <div class="page" id="page-inquilinos" style="display:none">
       <div class="sec-title">Inquilinos</div>
+      <div class="filter-bar">
+        <div class="filter-search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="filter-search" id="inq-texto" type="search" placeholder="Buscar por nombre, teléfono o email…" oninput="renderInquilinos()">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select id="inq-inmueble" onchange="renderInquilinos()" style="flex:1;padding:8px 12px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+            <option value="">Todos los inmuebles</option>
+          </select>
+        </div>
+        <div class="filter-chips" id="chips-inq-estado">
+          <button class="chip on" data-val="Vigente" onclick="setInqChip('Vigente',this)">✅ Vigentes</button>
+          <button class="chip" data-val="" onclick="setInqChip('',this)">Todos</button>
+          <button class="chip" data-val="Baja" onclick="setInqChip('Baja',this)">🔴 Bajas</button>
+        </div>
+      </div>
+      <div class="filter-count" id="inq-count"></div>
       <div id="inquilinos"><div class="loading"><div class="spin"></div> Cargando...</div></div>
     </div>
 
     <!-- PÀGINA: COBROS -->
     <div class="page" id="page-cobros" style="display:none">
       <div class="sec-title">Cobros</div>
+      <div class="filter-bar">
+        <select id="cob-inmueble" onchange="renderCobros()" style="width:100%;padding:9px 12px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+          <option value="">Todos los inmuebles</option>
+        </select>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="flex:1;min-width:0">
+            <label style="font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px">Desde</label>
+            <input id="cob-mes-desde" type="month" onchange="renderCobros()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+          </div>
+          <div style="flex:1;min-width:0">
+            <label style="font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px">Hasta</label>
+            <input id="cob-mes-hasta" type="month" onchange="renderCobros()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+          </div>
+          <button onclick="document.getElementById('cob-mes-desde').value='';document.getElementById('cob-mes-hasta').value='';renderCobros()" style="margin-top:16px;border:1px solid var(--br);background:#fff;border-radius:8px;padding:8px 10px;font:12px system-ui;color:var(--mu);cursor:pointer;white-space:nowrap">✕</button>
+        </div>
+        <div class="filter-chips" id="chips-cob-estado">
+          <button class="chip on" data-val="" onclick="setCobChip('',this)">Todos</button>
+          <button class="chip" data-val="Pendiente" onclick="setCobChip('Pendiente',this)">⏳ Pendiente</button>
+          <button class="chip" data-val="Pagado" onclick="setCobChip('Pagado',this)">✅ Pagado</button>
+          <button class="chip" data-val="Retrasado" onclick="setCobChip('Retrasado',this)">🔴 Retrasado</button>
+        </div>
+      </div>
+      <div class="filter-count" id="cob-count"></div>
       <div class="tcard">
         <table>
           <thead><tr><th>Inmueble</th><th>Mes</th><th>Importe</th><th>Estado</th><th></th></tr></thead>
@@ -342,6 +488,35 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
     <!-- PÀGINA: GASTOS -->
     <div class="page" id="page-gastos" style="display:none">
       <div class="sec-title">Gastos</div>
+      <div class="filter-bar">
+        <div class="filter-search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="filter-search" id="gas-texto" type="search" placeholder="Buscar por concepto…" oninput="renderGastos()">
+        </div>
+        <select id="gas-inmueble" onchange="renderGastos()" style="width:100%;padding:9px 12px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+          <option value="">Todos los inmuebles</option>
+        </select>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="flex:1;min-width:0">
+            <label style="font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px">Desde</label>
+            <input id="gas-desde" type="month" onchange="renderGastos()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+          </div>
+          <div style="flex:1;min-width:0">
+            <label style="font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px">Hasta</label>
+            <input id="gas-hasta" type="month" onchange="renderGastos()" style="width:100%;padding:8px 10px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none">
+          </div>
+          <button onclick="document.getElementById('gas-desde').value='';document.getElementById('gas-hasta').value='';renderGastos()" style="margin-top:16px;border:1px solid var(--br);background:#fff;border-radius:8px;padding:8px 10px;font:12px system-ui;color:var(--mu);cursor:pointer">✕</button>
+        </div>
+        <div class="filter-chips" id="chips-gas-cat">
+          <button class="chip on" data-val="" onclick="setGasChip('',this)">Todas</button>
+          <button class="chip" data-val="Reparación" onclick="setGasChip('Reparación',this)">🔧 Reparación</button>
+          <button class="chip" data-val="IBI" onclick="setGasChip('IBI',this)">🏛️ IBI</button>
+          <button class="chip" data-val="Seguro" onclick="setGasChip('Seguro',this)">🛡️ Seguro</button>
+          <button class="chip" data-val="Comunidad" onclick="setGasChip('Comunidad',this)">🏘️ Comunidad</button>
+          <button class="chip" data-val="Otros" onclick="setGasChip('Otros',this)">📋 Otros</button>
+        </div>
+      </div>
+      <div class="filter-count" id="gas-count"></div>
       <div class="tcard">
         <table>
           <thead><tr><th>Inmueble</th><th>Fecha</th><th>Concepto</th><th>Importe</th><th>Cat.</th></tr></thead>
@@ -382,10 +557,13 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
 <div class="modal-bg" id="modalInmueble">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3>🏢 Nuevo inmueble</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0">🏢 Nuevo inmueble</h3>
+      <button class="tbtn ghost" onclick="openModal('categorias')" style="font-size:11px;gap:4px">⚙️ Tipos</button>
+    </div>
     <div class="form">
       <div><label>Tipo</label>
-        <select id="f_tipo"><option>Nave</option><option>Local</option><option>Vivienda</option><option>Garaje</option><option>Trastero</option></select></div>
+        <select id="f_tipo"></select></div>
       <div><label>Estado</label>
         <select id="f_estado"><option>Disponible</option><option>Alquilado</option></select></div>
       <div class="full"><label>Dirección</label>
@@ -469,9 +647,50 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
   </div>
 </div>
 
+<!-- MODAL CATEGORIAS INMUEBLE -->
+<div class="modal-bg" id="modalCategorias">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>⚙️ Tipos de inmueble</h3>
+    <div id="cat-list" style="margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div style="position:relative;flex:1">
+        <input id="cat-emoji" placeholder="🏠" style="width:52px;text-align:center;padding:11px 6px;flex-shrink:0">
+      </div>
+      <input id="cat-nombre" placeholder="Nombre del tipo…" style="flex:1">
+      <button class="hbtn azul" onclick="addCategoria()" style="white-space:nowrap;padding:11px 14px">+ Añadir</button>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel" onclick="closeModal('modalCategorias')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DOCUMENTS -->
+<div class="modal-bg" id="modalDocuments">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="doc-modal-title">📎 Documentos</h3>
+    <div class="upload-area" onclick="document.getElementById('doc-file-input').click()">
+      <input type="file" id="doc-file-input" multiple onchange="uploadDocuments(this.files)">
+      <div style="font-size:28px">📂</div>
+      <p>Haz clic para seleccionar archivos</p>
+      <p style="font-size:11px">PDF, imágenes, Word, Excel… cualquier formato</p>
+    </div>
+    <div id="doc-upload-progress" style="display:none;font-size:12px;color:var(--mu);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+      <div class="spin"></div><span id="doc-progress-text">Subiendo...</span>
+    </div>
+    <div id="doc-list" style="margin-top:8px"></div>
+    <div class="modal-footer">
+      <button class="cancel" onclick="closeModal('modalDocuments')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://difgwfrklhqkmzifsiax.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmd3ZnJrbGhxa216aWZzaWF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDI4MDYsImV4cCI6MjA5MDQ3ODgwNn0.cBcfUzrK7r7mhLxF_R3FldpU5o3j8g2Bgmdss8Gxn2g';
@@ -479,8 +698,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const hoy = new Date();
 const ymActual = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
-let D = { inmuebles:[], inquilinos:[], cobros:[], gastos:[] };
+let D = { inmuebles:[], inquilinos:[], cobros:[], gastos:[], categorias:[], documents:[] };
 
+// ─── HELPERS ────────────────────────────────────────────────────────────────
 function euro(n){ return (Number(n)||0).toFixed(2).replace('.',',')+' €'; }
 function badge(s){
   if(['Pagado','Vigente','Alquilado','Disponible'].includes(s)) return `<span class="badge b-ok">${s}</span>`;
@@ -502,6 +722,25 @@ function goTo(id, btn){
   if(page){ page.style.display='block'; window.scrollTo(0,0); }
 }
 
+// ─── AUTH UI ────────────────────────────────────────────────────────────────
+function hideSplash(){ document.getElementById('splashScreen').style.display='none'; }
+
+function showLogin(){
+  hideSplash();
+  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('appScreen').style.display='none';
+}
+function showApp(email){
+  hideSplash();
+  document.getElementById('authScreen').style.display='none';
+  // Deixem que el media query de desktop gestioni display:flex/block;
+  // simplement traiem el display:none
+  const appEl = document.getElementById('appScreen');
+  appEl.style.display = '';   // reset → el CSS natiu pren el control
+  document.getElementById('userEmail').textContent=email.split('@')[0];
+  document.getElementById('avatarInitial').textContent=(email[0]||'?').toUpperCase();
+}
+
 function switchTab(tab){
   document.getElementById('loginForm').style.display = tab==='login' ? '' : 'none';
   document.getElementById('registerForm').style.display = tab==='register' ? '' : 'none';
@@ -515,10 +754,6 @@ function showAuthMsg(msg, type='err'){
   el.className='auth-msg '+type;
   el.style.display='block';
 }
-function showLogin(){
-  document.getElementById('authScreen').style.display='flex';
-  document.getElementById('appScreen').style.display='none';
-}
 function togglePass(inputId, btn){
   const inp=document.getElementById(inputId);
   const show=inp.type==='password';
@@ -526,13 +761,8 @@ function togglePass(inputId, btn){
   btn.querySelector('.eye-on').style.display=show?'none':'';
   btn.querySelector('.eye-off').style.display=show?'':'none';
 }
-function showApp(email){
-  document.getElementById('authScreen').style.display='none';
-  document.getElementById('appScreen').style.display='block';
-  document.getElementById('userEmail').textContent=email.split('@')[0];
-  document.getElementById('avatarInitial').textContent=(email[0]||'?').toUpperCase();
-}
 
+// ─── AUTH ACTIONS ────────────────────────────────────────────────────────────
 async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
@@ -554,30 +784,379 @@ async function doLogout(){
   showLogin();
 }
 
-sb.auth.onAuthStateChange((event, session)=>{
-  if(event==='SIGNED_IN' && session && session.user){
-    showApp(session.user.email||'');
+// ─── AUTH STATE — punt central de control ───────────────────────────────────
+// `onAuthStateChange` dispara INITIAL_SESSION en carregar la pàgina,
+// tant si hi ha sessió (→ SIGNED_IN) com si no (→ cap event o SIGNED_OUT).
+// Usem `getSession` per resoldre l'estat inicial sense dependre de l'event.
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user) {
+    showApp(session.user.email || '');
     loadAll();
-  } else if(event==='SIGNED_OUT'){
+  } else {
+    showLogin();
+  }
+})();
+
+// Escoltem canvis posteriors (login, logout, token refresh)
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session && session.user) {
+    showApp(session.user.email || '');
+    loadAll();
+  } else if (event === 'SIGNED_OUT') {
     showLogin();
   }
 });
 
+// ─── CATEGORIES IMMUEBLES ────────────────────────────────────────────────────
+function renderChipsTipo(){
+  const container = document.getElementById('chips-tipo');
+  if(!container) return;
+  const activeVal = F.tipo;
+  container.innerHTML = `<button class="chip${activeVal===''?' on':''}" data-val="" onclick="setChip('tipo','',this)">Todos</button>`
+    + D.categorias.map(c=>`
+      <button class="chip${activeVal===c.nombre?' on':''}" data-val="${c.nombre}" onclick="setChip('tipo','${c.nombre}',this)">${c.emoji} ${c.nombre}</button>
+    `).join('');
+}
+
+function renderSelectTipo(selectedVal=''){
+  const sel = document.getElementById('f_tipo');
+  if(!sel) return;
+  sel.innerHTML = D.categorias.map(c=>`
+    <option value="${c.nombre}"${c.nombre===selectedVal?' selected':''}>${c.emoji} ${c.nombre}</option>
+  `).join('');
+}
+
+function renderCatList(){
+  const el = document.getElementById('cat-list');
+  if(!el) return;
+  el.innerHTML = D.categorias.length
+    ? D.categorias.map(c=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9">
+        <span style="font-size:20px;width:28px;text-align:center">${c.emoji}</span>
+        <span style="flex:1;font-size:13px;font-weight:600">${c.nombre}</span>
+        <button class="tbtn del" onclick="deleteCategoria(${c.id},'${c.nombre}')">🗑</button>
+      </div>`).join('')
+    : `<div style="font-size:13px;color:var(--mu);padding:8px 0">No hay tipos definidos.</div>`;
+}
+
+async function addCategoria(){
+  const emoji  = document.getElementById('cat-emoji').value.trim() || '🏠';
+  const nombre = document.getElementById('cat-nombre').value.trim();
+  if(!nombre) return showToast('Escribe un nombre');
+  if(D.categorias.some(c=>c.nombre.toLowerCase()===nombre.toLowerCase()))
+    return showToast('Ya existe ese tipo');
+  const { data:{ user } } = await sb.auth.getUser();
+  const {error} = await sb.from('categorias_inmueble')
+    .insert({nombre, emoji, user_id: user.id});
+  if(error) return showToast('Error: '+error.message);
+  document.getElementById('cat-emoji').value  = '';
+  document.getElementById('cat-nombre').value = '';
+  await reloadCategorias();
+  showToast('✅ Tipo añadido');
+}
+
+async function deleteCategoria(id, nombre){
+  const enUso = D.inmuebles.some(im=>im.tipo===nombre);
+  if(enUso && !confirm(`El tipo "${nombre}" está en uso en ${D.inmuebles.filter(im=>im.tipo===nombre).length} inmueble(s). ¿Eliminar igualmente?`)) return;
+  const {error} = await sb.from('categorias_inmueble').delete().eq('id',id);
+  if(error) return showToast('Error: '+error.message);
+  await reloadCategorias();
+  showToast('✅ Tipo eliminado');
+}
+
+async function reloadCategorias(){
+  const {data} = await sb.from('categorias_inmueble').select('*').order('nombre');
+  D.categorias = data||[];
+  renderChipsTipo();
+  renderSelectTipo();
+  renderCatList();
+  renderInmuebles();
+}
+
+// ─── FILTRES IMMOBLES ────────────────────────────────────────────────────────
+const F = { estado: '', tipo: '' };
+
+function setChip(group, val, btn){
+  F[group] = val;
+  document.getElementById('chips-'+group).querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderInmuebles();
+}
+
+function renderInmuebles(){
+  const txt = (document.getElementById('flt-texto')?.value||'').toLowerCase().trim();
+  const list = D.inmuebles.filter(im=>{
+    if(F.estado && im.estado!==F.estado) return false;
+    if(F.tipo   && im.tipo!==F.tipo)     return false;
+    if(txt && !`${im.direccion} ${im.poblacion||''}`.toLowerCase().includes(txt)) return false;
+    return true;
+  });
+  const countEl = document.getElementById('flt-count');
+  if(countEl){
+    const total = D.inmuebles.length;
+    countEl.textContent = list.length===total
+      ? `${total} inmueble${total!==1?'s':''}`
+      : `${list.length} de ${total} inmueble${total!==1?'s':''}`;
+  }
+  document.getElementById('inmuebles').innerHTML = list.length
+    ? list.map(im=>`
+      <div class="item-card">
+        <div class="item-icon ki-azul">🏢</div>
+        <div class="item-body">
+          <b>${im.direccion}</b>
+          <div class="item-sub">${im.poblacion||''} · ${im.tipo} · ${euro(im.alquiler)}/mes · Compra ${euro(im.precio_compra)}</div>
+          <div style="margin-top:6px">${badge(im.estado||'')}</div>
+          <div class="item-actions">
+            <button class="ia-edit" onclick="editInmueble(${im.id})">✏️ Editar</button>
+            <button class="ia-blue" onclick="openDocs('inmueble',${im.id},\`${im.direccion}\`)">📎 Docs</button>
+            <button class="ia-del" onclick="deleteItem('inmuebles',${im.id})">🗑 Eliminar</button>
+          </div>
+        </div>
+      </div>`).join('')
+    : `<div class="empty">${D.inmuebles.length?'Ningún inmueble coincide con los filtros.':'No hay inmuebles registrados.'}</div>`;
+}
+
+let inqEstado = 'Vigente';
+
+function setInqChip(val, btn){
+  inqEstado = val;
+  document.getElementById('chips-inq-estado').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderInquilinos();
+}
+
+function renderInquilinos(){
+  const sel = document.getElementById('inq-inmueble');
+  if(sel){
+    const currentVal = sel.value;
+    sel.innerHTML = `<option value="">Todos los inmuebles</option>`
+      + D.inmuebles.map(im=>`<option value="${im.id}"${String(im.id)===currentVal?' selected':''}>${im.direccion}</option>`).join('');
+  }
+
+  const txt   = (document.getElementById('inq-texto')?.value||'').toLowerCase().trim();
+  const inmId = document.getElementById('inq-inmueble')?.value||'';
+
+  const list = D.inquilinos.filter(i=>{
+    if(inqEstado && i.estado !== inqEstado) return false;
+    if(inmId && String(i.inmueble_id)!==inmId) return false;
+    if(txt && !`${i.nombre} ${i.telefono||''} ${i.email||''}`.toLowerCase().includes(txt)) return false;
+    return true;
+  });
+
+  const countEl = document.getElementById('inq-count');
+  if(countEl){
+    const total = D.inquilinos.length;
+    countEl.textContent = list.length===total
+      ? `${total} inquilino${total!==1?'s':''}`
+      : `${list.length} de ${total} inquilino${total!==1?'s':''}`;
+  }
+
+  document.getElementById('inquilinos').innerHTML = list.length
+    ? list.map(i=>{
+        const esBaja = i.estado === 'Baja';
+        const tel=i.telefono||'';
+        const wa=(tel.replace(/[^\d]/g,'')).replace(/^(?!34)/,'34');
+        const msg=encodeURIComponent(`Hola ${i.nombre}, te contacto por tu alquiler.`);
+        return `<div class="item-card" style="${esBaja?'opacity:.55;':''}">
+          <div class="item-icon ${esBaja?'ki-gris':'ki-morado'}">${esBaja?'👤':'👤'}</div>
+          <div class="item-body">
+            <b>${i.nombre}</b>
+            <div class="item-sub">${i.telefono||'Sin teléfono'} · ${i.email||'Sin email'} · ${euro(i.renta)}/mes<br>${getInm(i.inmueble_id)?.direccion||'-'}${esBaja&&i.fecha_baja?` · Baja: ${i.fecha_baja}`:''}</div>
+            <div style="margin-top:6px">${badge(i.estado)}</div>
+            <div class="item-actions">
+              ${esBaja ? `
+                <button class="ia-green" onclick="reactivarInquilino(${i.id})">♻️ Reactivar</button>
+                <button class="ia-blue" onclick="openDocs('inquilino',${i.id},\`${i.nombre}\`)">📎 Docs</button>
+                <button class="ia-del" onclick="deleteItem('inquilinos',${i.id})">🗑 Eliminar</button>
+              ` : `
+                <a class="ia-green" href="tel:${tel}">📞 Llamar</a>
+                <a class="ia-blue" target="_blank" href="https://wa.me/${wa}?text=${msg}">💬 WhatsApp</a>
+                <a class="ia-yellow" href="mailto:${i.email||''}?subject=Alquiler&body=${msg}">✉ Email</a>
+                <button class="ia-edit" onclick="editInquilino(${i.id})">✏️ Editar</button>
+                <button class="ia-blue" onclick="openDocs('inquilino',${i.id},\`${i.nombre}\`)">📎 Docs</button>
+                <button class="ia-del" onclick="darBajaInquilino(${i.id},'${i.nombre}')">🔴 Dar de baja</button>
+              `}
+            </div>
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="empty">${D.inquilinos.length?'Ningún inquilino coincide con los filtros.':'No hay inquilinos registrados.'}</div>`;
+}
+
+async function darBajaInquilino(id, nombre){
+  if(!confirm(`¿Dar de baja a ${nombre}?\nSe conservará todo su historial.`)) return;
+  const today = new Date().toISOString().slice(0,10);
+  const {error} = await sb.from('inquilinos').update({
+    estado: 'Baja',
+    fecha_baja: today,
+  }).eq('id', id);
+  if(error) return showToast('Error: '+error.message);
+  await loadAll();
+  showToast(`✅ ${nombre} dado de baja`);
+}
+
+async function reactivarInquilino(id){
+  const {error} = await sb.from('inquilinos').update({
+    estado: 'Vigente',
+    fecha_baja: null,
+  }).eq('id', id);
+  if(error) return showToast('Error: '+error.message);
+  await loadAll();
+  showToast('✅ Inquilino reactivado');
+}
+
+let cobEstado = '';
+
+function setCobChip(val, btn){
+  cobEstado = val;
+  document.getElementById('chips-cob-estado').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderCobros();
+}
+
+function renderCobros(){
+  const sel = document.getElementById('cob-inmueble');
+  if(sel){
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">Todos los inmuebles</option>`
+      + D.inmuebles.map(im=>`<option value="${im.id}"${String(im.id)===cur?' selected':''}>${im.direccion}</option>`).join('');
+  }
+
+  const inmId = document.getElementById('cob-inmueble')?.value||'';
+  const desde = document.getElementById('cob-mes-desde')?.value||'';
+  const hasta = document.getElementById('cob-mes-hasta')?.value||'';
+
+  const list = D.cobros.filter(c=>{
+    if(inmId && String(c.inmueble_id)!==inmId) return false;
+    if(desde && c.mes < desde)                 return false;
+    if(hasta && c.mes > hasta)                 return false;
+    if(cobEstado && c.estado!==cobEstado)       return false;
+    return true;
+  });
+
+  const countEl = document.getElementById('cob-count');
+  if(countEl){
+    const total = D.cobros.length;
+    const sumFiltrat = list.reduce((a,b)=>a+Number(b.importe||0),0);
+    countEl.textContent = list.length===total
+      ? `${total} cobro${total!==1?'s':''} · ${euro(sumFiltrat)}`
+      : `${list.length} de ${total} cobro${total!==1?'s':''} · ${euro(sumFiltrat)}`;
+  }
+
+  document.getElementById('tablaCobros').innerHTML = list.length
+    ? list.map(c=>`
+      <tr>
+        <td>${getInm(c.inmueble_id)?.direccion||'-'}</td>
+        <td>${c.mes}</td>
+        <td><b>${euro(c.importe)}</b></td>
+        <td>${badge(c.estado)}</td>
+        <td style="white-space:nowrap">
+          <button class="tbtn ok" onclick="toggleCobro(${c.id},'${c.estado}')" style="margin-right:4px">${c.estado==='Pagado'?'✓ Pagado':'Pagar'}</button>
+          <button class="tbtn ghost" onclick="editCobro(${c.id})">✏️</button>
+          <button class="tbtn del" onclick="deleteItem('cobros',${c.id})">🗑</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--mu)">${D.cobros.length?'Ningún cobro coincide con los filtros.':'No hay cobros registrados.'}</td></tr>`;
+}
+
+let gasCategoria = '';
+
+function setGasChip(val, btn){
+  gasCategoria = val;
+  document.getElementById('chips-gas-cat').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderGastos();
+}
+
+function renderGastos(){
+  const sel = document.getElementById('gas-inmueble');
+  if(sel){
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">Todos los inmuebles</option>`
+      + D.inmuebles.map(im=>`<option value="${im.id}"${String(im.id)===cur?' selected':''}>${im.direccion}</option>`).join('');
+  }
+
+  const txt   = (document.getElementById('gas-texto')?.value||'').toLowerCase().trim();
+  const inmId = document.getElementById('gas-inmueble')?.value||'';
+  const desde = document.getElementById('gas-desde')?.value||'';
+  const hasta = document.getElementById('gas-hasta')?.value||'';
+
+  const list = D.gastos.filter(g=>{
+    if(inmId && String(g.inmueble_id)!==inmId)       return false;
+    if(gasCategoria && g.categoria!==gasCategoria)   return false;
+    if(desde && g.fecha.slice(0,7) < desde)          return false;
+    if(hasta && g.fecha.slice(0,7) > hasta)          return false;
+    if(txt && !g.concepto.toLowerCase().includes(txt)) return false;
+    return true;
+  });
+
+  const countEl = document.getElementById('gas-count');
+  if(countEl){
+    const total = D.gastos.length;
+    const sumFiltrat = list.reduce((a,b)=>a+Number(b.importe||0),0);
+    countEl.textContent = list.length===total
+      ? `${total} gasto${total!==1?'s':''} · ${euro(sumFiltrat)}`
+      : `${list.length} de ${total} gasto${total!==1?'s':''} · ${euro(sumFiltrat)}`;
+  }
+
+  document.getElementById('tablaGastos').innerHTML = list.length
+    ? list.map(g=>`
+      <tr>
+        <td>${getInm(g.inmueble_id)?.direccion||'-'}</td>
+        <td>${g.fecha}</td>
+        <td>${g.concepto}</td>
+        <td><b>${euro(g.importe)}</b></td>
+        <td>${g.categoria}<br>
+          <button class="tbtn ghost" onclick="editGasto(${g.id})" style="margin-top:4px">✏️</button>
+          <button class="tbtn ok" onclick="openDocs('gasto',${g.id},\`${g.concepto}\`)" style="margin-top:4px">📎</button>
+          <button class="tbtn del" onclick="deleteItem('gastos',${g.id})" style="margin-top:4px">🗑</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--mu)">${D.gastos.length?'Ningún gasto coincide con los filtros.':'No hay gastos registrados.'}</td></tr>`;
+}
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const CATS_DEFAULT = [
+  {nombre:'Nave',emoji:'🏭'},{nombre:'Local',emoji:'🏪'},
+  {nombre:'Vivienda',emoji:'🏠'},{nombre:'Garaje',emoji:'🚗'},
+  {nombre:'Trastero',emoji:'📦'}
+];
+
 async function loadAll(){
-  const [inm,inq,cob,gas] = await Promise.all([
+  const { data: { user } } = await sb.auth.getUser();
+  const uid = user?.id;
+
+  const [inm,inq,cob,gas,cats,docs] = await Promise.all([
     sb.from('inmuebles').select('*').order('id'),
     sb.from('inquilinos').select('*').order('id'),
     sb.from('cobros').select('*').order('id'),
-    sb.from('gastos').select('*').order('id')
+    sb.from('gastos').select('*').order('id'),
+    sb.from('categorias_inmueble').select('*').order('nombre'),
+    sb.from('documents').select('*').order('created_at'),
   ]);
-  D.inmuebles = inm.data||[];
+  D.inmuebles  = inm.data||[];
   D.inquilinos = inq.data||[];
-  D.cobros = cob.data||[];
-  D.gastos = gas.data||[];
+  D.cobros     = cob.data||[];
+  D.gastos     = gas.data||[];
+  D.categorias = cats.data||[];
+  D.documents  = docs.data||[];
+
+  // Seed categories per defecte si l'usuari no en té cap
+  if(D.categorias.length === 0 && uid){
+    const seeds = CATS_DEFAULT.map(c=>({...c, user_id: uid}));
+    const {data} = await sb.from('categorias_inmueble').insert(seeds).select();
+    D.categorias = data||[];
+  }
+
   render();
 }
 
 function render(){
+  // Actualitzar chips de tipus i select del modal dinàmicament
+  renderChipsTipo();
+  renderSelectTipo();
+
   const alquilados = D.inmuebles.filter(x=>x.estado==='Alquilado').length;
   const rentaMes = D.inquilinos.reduce((a,b)=>a+Number(b.renta||0), 0);
   const totalCobrado = D.cobros.filter(c=>c.estado==='Pagado').reduce((a,b)=>a+Number(b.importe||0), 0);
@@ -624,72 +1203,24 @@ function render(){
     </div></div>
   `;
 
-  document.getElementById('inmuebles').innerHTML = D.inmuebles.length
-    ? D.inmuebles.map(im=>`
-      <div class="item-card">
-        <div class="item-icon ki-azul">🏢</div>
-        <div class="item-body">
-          <b>${im.direccion}</b>
-          <div class="item-sub">${im.poblacion||''} · ${im.tipo} · ${euro(im.alquiler)}/mes · Compra ${euro(im.precio_compra)}</div>
-          <div style="margin-top:6px">${badge(im.estado||'')}</div>
-          <div class="item-actions">
-            <button class="ia-edit" onclick="editInmueble(${im.id})">✏️ Editar</button>
-            <button class="ia-del" onclick="deleteItem('inmuebles',${im.id})">🗑 Eliminar</button>
-          </div>
-        </div>
-      </div>`).join('')
-    : `<div class="empty">No hay inmuebles registrados.</div>`;
+  renderInmuebles();
+  renderInquilinos();
 
-  document.getElementById('inquilinos').innerHTML = D.inquilinos.length
-    ? D.inquilinos.map(i=>{
-        const tel=i.telefono||'';
-        const wa=(tel.replace(/[^\d]/g,'')).replace(/^(?!34)/,'34');
-        const msg=encodeURIComponent(`Hola ${i.nombre}, te contacto por tu alquiler.`);
-        return `<div class="item-card">
-          <div class="item-icon ki-morado">👤</div>
-          <div class="item-body">
-            <b>${i.nombre}</b>
-            <div class="item-sub">${i.telefono||'Sin teléfono'} · ${i.email||'Sin email'} · ${euro(i.renta)}/mes<br>${getInm(i.inmueble_id)?.direccion||'-'}</div>
-            <div class="item-actions">
-              <a class="ia-green" href="tel:${tel}">📞 Llamar</a>
-              <a class="ia-blue" target="_blank" href="https://wa.me/${wa}?text=${msg}">💬 WhatsApp</a>
-              <a class="ia-yellow" href="mailto:${i.email||''}?subject=Alquiler&body=${msg}">✉ Email</a>
-              <button class="ia-edit" onclick="editInquilino(${i.id})">✏️ Editar</button>
-              <button class="ia-del" onclick="deleteItem('inquilinos',${i.id})">🗑 Eliminar</button>
-            </div>
-          </div>
-        </div>`;
-      }).join('')
-    : `<div class="empty">No hay inquilinos registrados.</div>`;
+  // Inicialitzar rang de mesos per defecte: gener any actual → mes actual
+  const elDesde = document.getElementById('cob-mes-desde');
+  const elHasta = document.getElementById('cob-mes-hasta');
+  if(elDesde && !elDesde.value) elDesde.value = `${hoy.getFullYear()}-01`;
+  if(elHasta && !elHasta.value) elHasta.value = ymActual;
 
-  document.getElementById('tablaCobros').innerHTML = D.cobros.length
-    ? D.cobros.map(c=>`
-      <tr>
-        <td>${getInm(c.inmueble_id)?.direccion||'-'}</td>
-        <td>${c.mes}</td>
-        <td><b>${euro(c.importe)}</b></td>
-        <td>${badge(c.estado)}</td>
-        <td style="white-space:nowrap">
-          <button class="tbtn ok" onclick="toggleCobro(${c.id},'${c.estado}')" style="margin-right:4px">${c.estado==='Pagado'?'✓ Pagado':'Pagar'}</button>
-          <button class="tbtn ghost" onclick="editCobro(${c.id})">✏️</button>
-          <button class="tbtn del" onclick="deleteItem('cobros',${c.id})">🗑</button>
-        </td>
-      </tr>`).join('')
-    : `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--mu)">No hay cobros registrados.</td></tr>`;
+  renderCobros();
 
-  document.getElementById('tablaGastos').innerHTML = D.gastos.length
-    ? D.gastos.map(g=>`
-      <tr>
-        <td>${getInm(g.inmueble_id)?.direccion||'-'}</td>
-        <td>${g.fecha}</td>
-        <td>${g.concepto}</td>
-        <td><b>${euro(g.importe)}</b></td>
-        <td>${g.categoria}<br>
-          <button class="tbtn ghost" onclick="editGasto(${g.id})" style="margin-top:4px">✏️</button>
-          <button class="tbtn del" onclick="deleteItem('gastos',${g.id})" style="margin-top:4px">🗑</button>
-        </td>
-      </tr>`).join('')
-    : `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--mu)">No hay gastos registrados.</td></tr>`;
+  // Inicialitzar rang de dates gastos per defecte
+  const elGasDesde = document.getElementById('gas-desde');
+  const elGasHasta = document.getElementById('gas-hasta');
+  if(elGasDesde && !elGasDesde.value) elGasDesde.value = `${hoy.getFullYear()}-01`;
+  if(elGasHasta && !elGasHasta.value) elGasHasta.value = ymActual;
+
+  renderGastos();
 
   const alertas = D.cobros.filter(c=>c.estado!=='Pagado');
   document.getElementById('alertas').innerHTML = alertas.length
@@ -700,15 +1231,19 @@ function render(){
         </div>`;
       }).join('')
     : `<div style="font-size:13px;color:var(--mu);padding:4px 0">✅ Sin alertas pendientes.</div>`;
+
+  // Renderitzar gràfics amb un petit delay per assegurar que el canvas és visible
+  setTimeout(renderCharts, 50);
 }
 
+// ─── EDIT ────────────────────────────────────────────────────────────────────
 let editingId = null;
 
 function editInmueble(id){
   const im = D.inmuebles.find(x=>x.id===id);
   if(!im) return;
   editingId = id;
-  document.getElementById('f_tipo').value = im.tipo;
+  renderSelectTipo(im.tipo);
   document.getElementById('f_estado').value = im.estado;
   document.getElementById('f_direccion').value = im.direccion;
   document.getElementById('f_poblacion').value = im.poblacion||'';
@@ -717,7 +1252,6 @@ function editInmueble(id){
   document.querySelector('#modalInmueble h3').textContent = '🏢 Editar inmueble';
   document.getElementById('modalInmueble').classList.add('open');
 }
-
 function editInquilino(id){
   const i = D.inquilinos.find(x=>x.id===id);
   if(!i) return;
@@ -732,7 +1266,6 @@ function editInquilino(id){
   document.querySelector('#modalInquilino h3').textContent = '👤 Editar inquilino';
   document.getElementById('modalInquilino').classList.add('open');
 }
-
 function editCobro(id){
   const c = D.cobros.find(x=>x.id===id);
   if(!c) return;
@@ -745,7 +1278,6 @@ function editCobro(id){
   document.querySelector('#modalCobro h3').textContent = '💰 Editar cobro';
   document.getElementById('modalCobro').classList.add('open');
 }
-
 function editGasto(id){
   const g = D.gastos.find(x=>x.id===id);
   if(!g) return;
@@ -768,6 +1300,7 @@ async function deleteItem(tabla, id){
   showToast('✅ Eliminado correctamente');
 }
 
+// ─── MODALS ──────────────────────────────────────────────────────────────────
 function openModal(tipo){
   editingId = null;
   const selInm = D.inmuebles.map(x=>`<option value="${x.id}">${x.direccion}</option>`).join('');
@@ -777,6 +1310,7 @@ function openModal(tipo){
   });
   const today=new Date().toISOString().slice(0,10);
   if(tipo==='inmueble'){
+    renderSelectTipo();
     ['f_direccion','f_poblacion','f_alquiler','f_compra'].forEach(id=>{ document.getElementById(id).value=''; });
     document.querySelector('#modalInmueble h3').textContent='🏢 Nuevo inmueble';
     document.getElementById('modalInmueble').classList.add('open');
@@ -803,9 +1337,16 @@ function openModal(tipo){
     document.querySelector('#modalGasto h3').textContent='🔧 Nuevo gasto';
     document.getElementById('modalGasto').classList.add('open');
   }
+  if(tipo==='categorias'){
+    renderCatList();
+    document.getElementById('cat-emoji').value='';
+    document.getElementById('cat-nombre').value='';
+    document.getElementById('modalCategorias').classList.add('open');
+  }
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
+// ─── SAVE ────────────────────────────────────────────────────────────────────
 async function saveInmueble(){
   const row={
     tipo: document.getElementById('f_tipo').value,
@@ -887,6 +1428,281 @@ async function toggleCobro(id, estadoActual){
   await loadAll();
 }
 
+// ─── DOCUMENTS ───────────────────────────────────────────────────────────────
+let docContext = { tipus: null, id: null, nom: null };
+
+function fileEmoji(nomFitxer){
+  const ext = nomFitxer.split('.').pop().toLowerCase();
+  if(['pdf'].includes(ext)) return '📄';
+  if(['jpg','jpeg','png','gif','webp','svg'].includes(ext)) return '🖼️';
+  if(['doc','docx'].includes(ext)) return '📝';
+  if(['xls','xlsx','csv'].includes(ext)) return '📊';
+  if(['zip','rar','7z'].includes(ext)) return '🗜️';
+  return '📎';
+}
+
+function formatMida(bytes){
+  if(!bytes) return '';
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+async function openDocs(tipus, id, nom){
+  docContext = { tipus, id, nom };
+  document.getElementById('doc-modal-title').textContent = `📎 ${nom}`;
+  document.getElementById('doc-file-input').value = '';
+  document.getElementById('doc-upload-progress').style.display = 'none';
+  document.getElementById('modalDocuments').classList.add('open');
+  renderDocList();
+}
+
+function renderDocList(){
+  const list = D.documents.filter(d => d.entitat_tipus === docContext.tipus && d.entitat_id === docContext.id);
+  const el = document.getElementById('doc-list');
+  if(!list.length){
+    el.innerHTML = `<div style="font-size:13px;color:var(--mu);padding:8px 0;text-align:center">No hay documentos adjuntos.</div>`;
+    return;
+  }
+  el.innerHTML = list.map(d=>`
+    <div class="doc-item">
+      <div class="doc-icon">${fileEmoji(d.nom_fitxer)}</div>
+      <div class="doc-info">
+        <div class="doc-name">${d.nom_fitxer}</div>
+        <div class="doc-meta">${formatMida(d.mida)} · ${new Date(d.created_at).toLocaleDateString('es-ES')}</div>
+      </div>
+      <a href="#" onclick="downloadDoc(event,'${d.storage_path}','${d.nom_fitxer}')" style="background:#dbeafe;color:#1d4ed8;border:none;border-radius:8px;padding:7px 10px;font:600 12px system-ui;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center">⬇</a>
+      <button onclick="deleteDoc(${d.id},'${d.storage_path}')" style="background:#fff5f5;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font:600 12px system-ui;cursor:pointer">🗑</button>
+    </div>`).join('');
+}
+
+async function uploadDocuments(files){
+  if(!files.length) return;
+  const { data:{ user } } = await sb.auth.getUser();
+  const uid = user.id;
+  const prog = document.getElementById('doc-upload-progress');
+  const progText = document.getElementById('doc-progress-text');
+  prog.style.display = 'flex';
+
+  let pujats = 0;
+  for(const file of files){
+    progText.textContent = `Subiendo ${pujats+1} de ${files.length}: ${file.name}`;
+    const path = `${uid}/${docContext.tipus}_${docContext.id}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await sb.storage.from('documents').upload(path, file);
+    if(upErr){ showToast('Error subiendo: ' + file.name); continue; }
+    const { error: dbErr } = await sb.from('documents').insert({
+      user_id: uid,
+      entitat_tipus: docContext.tipus,
+      entitat_id: docContext.id,
+      nom_fitxer: file.name,
+      storage_path: path,
+      mida: file.size,
+    });
+    if(dbErr){ showToast('Error guardando: ' + file.name); continue; }
+    pujats++;
+  }
+
+  prog.style.display = 'none';
+  document.getElementById('doc-file-input').value = '';
+  const {data} = await sb.from('documents').select('*').order('created_at');
+  D.documents = data||[];
+  renderDocList();
+  if(pujats) showToast(`✅ ${pujats} archivo${pujats!==1?'s':''} subido${pujats!==1?'s':''}`);
+}
+
+async function downloadDoc(e, path, nom){
+  e.preventDefault();
+  const { data, error } = await sb.storage.from('documents').download(path);
+  if(error) return showToast('Error descargando archivo');
+  const url = URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url; a.download = nom; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+async function deleteDoc(id, path){
+  if(!confirm('¿Eliminar este documento?')) return;
+  await sb.storage.from('documents').remove([path]);
+  await sb.from('documents').delete().eq('id', id);
+  const {data} = await sb.from('documents').select('*').order('created_at');
+  D.documents = data||[];
+  renderDocList();
+  showToast('✅ Documento eliminado');
+}
+
+// ─── GENERAR COBROS DEL MES ──────────────────────────────────────────────────
+async function generarCobrosMes(){
+  const inquilinsActius = D.inquilinos.filter(i => i.estado === 'Vigente');
+  if(!inquilinsActius.length) return showToast('No hay inquilinos activos');
+
+  // Cobros ja existents aquest mes (per detectar duplicats)
+  const jaExistents = new Set(
+    D.cobros
+      .filter(c => c.mes === ymActual)
+      .map(c => c.inmueble_id)
+  );
+
+  const nous = inquilinsActius.filter(i => !jaExistents.has(i.inmueble_id));
+
+  if(!nous.length){
+    return showToast(`Ya existen cobros para todos los inquilinos en ${ymActual}`);
+  }
+
+  const confirmMsg = `Crear ${nous.length} cobro${nous.length!==1?'s':''} para ${ymActual}:\n`
+    + nous.map(i => `· ${getInm(i.inmueble_id)?.direccion||'-'} — ${euro(i.renta)}`).join('\n');
+
+  if(!confirm(confirmMsg)) return;
+
+  const rows = nous.map(i => ({
+    inmueble_id: i.inmueble_id,
+    mes: ymActual,
+    importe: i.renta,
+    estado: 'Pendiente',
+    fecha_pago: null,
+  }));
+
+  const {error} = await sb.from('cobros').insert(rows);
+  if(error) return showToast('Error: ' + error.message);
+
+  await loadAll();
+  showToast(`✅ ${nous.length} cobro${nous.length!==1?'s':''} creado${nous.length!==1?'s':''} para ${ymActual}`);
+}
+
+// ─── GRÀFICS ─────────────────────────────────────────────────────────────────
+let chartEvol = null;
+let chartInm  = null;
+let rangeEvol = 6;
+let rangeInm  = 6;
+
+function setChartRange(which, months, btn){
+  document.getElementById(`range-${which}`).querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(which==='evol'){ rangeEvol = months; renderChartEvol(); }
+  else              { rangeInm  = months; renderChartInm();  }
+}
+
+function getMesosRange(months){
+  // Retorna array de strings 'YYYY-MM' ordenats, filtrats per rang
+  const tots = [...new Set([
+    ...D.cobros.map(c=>c.mes),
+    ...D.gastos.map(g=>g.fecha.slice(0,7))
+  ])].sort();
+  if(!months || tots.length <= months) return tots;
+  return tots.slice(-months);
+}
+
+function renderCharts(){
+  renderChartEvol();
+  renderChartInm();
+}
+
+function renderChartEvol(){
+  const mesos = getMesosRange(rangeEvol);
+  if(!mesos.length) return;
+
+  const cobros = mesos.map(m =>
+    D.cobros.filter(c=>c.mes===m && c.estado==='Pagado').reduce((a,b)=>a+Number(b.importe||0),0)
+  );
+  const gastos = mesos.map(m =>
+    D.gastos.filter(g=>g.fecha.slice(0,7)===m).reduce((a,b)=>a+Number(b.importe||0),0)
+  );
+  const benefici = mesos.map((_,i) => cobros[i] - gastos[i]);
+
+  const labels = mesos.map(m => {
+    const [y,mo] = m.split('-');
+    return `${mo}/${y.slice(2)}`;
+  });
+
+  if(chartEvol) chartEvol.destroy();
+  chartEvol = new Chart(document.getElementById('chartEvol'), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Cobros', data: cobros,
+          backgroundColor: 'rgba(22,163,74,.7)', borderRadius: 6, order: 2
+        },
+        {
+          type: 'bar', label: 'Gastos', data: gastos,
+          backgroundColor: 'rgba(220,38,38,.6)', borderRadius: 6, order: 2
+        },
+        {
+          type: 'line', label: 'Beneficio', data: benefici,
+          borderColor: '#1767d1', backgroundColor: 'rgba(23,103,209,.1)',
+          borderWidth: 2, pointRadius: 3, fill: true, tension: 0.3, order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { size: 11 }, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 },
+          callback: v => v.toLocaleString('es-ES',{minimumFractionDigits:0}) + '€' } }
+      }
+    }
+  });
+}
+
+function renderChartInm(){
+  const mesos = getMesosRange(rangeInm);
+  if(!mesos.length || !D.inmuebles.length) return;
+
+  const inms = D.inmuebles;
+  const ingressos = inms.map(im =>
+    D.cobros.filter(c => c.inmueble_id===im.id && mesos.includes(c.mes) && c.estado==='Pagado')
+            .reduce((a,b)=>a+Number(b.importe||0),0)
+  );
+  const despeses = inms.map(im =>
+    D.gastos.filter(g => g.inmueble_id===im.id && mesos.includes(g.fecha.slice(0,7)))
+            .reduce((a,b)=>a+Number(b.importe||0),0)
+  );
+  const benefici = inms.map((_,i) => ingressos[i] - despeses[i]);
+
+  // Nom complet de l'immoble
+  const labels = inms.map(im => im.direccion);
+
+  // Altura dinàmica: 72px per immoble per tenir espai suficient entre grups
+  const wrap = document.getElementById('chartInm').parentElement;
+  wrap.style.height = Math.max(180, inms.length * 72) + 'px';
+
+  if(chartInm) chartInm.destroy();
+  chartInm = new Chart(document.getElementById('chartInm'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Ingresos', data: ingressos, backgroundColor: 'rgba(22,163,74,.75)', borderRadius: 4 },
+        { label: 'Gastos',   data: despeses,  backgroundColor: 'rgba(220,38,38,.65)',  borderRadius: 4 },
+        { label: 'Beneficio',data: benefici,  backgroundColor: 'rgba(23,103,209,.75)', borderRadius: 4 },
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { size: 11 }, boxWidth: 12 } } },
+      scales: {
+        x: {
+          grid: { color: '#f1f5f9' },
+          ticks: { font: { size: 10 }, callback: v => v.toLocaleString('es-ES',{minimumFractionDigits:0}) + '€' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 11 },
+            crossAlign: 'far',
+          },
+          // Separació clara entre grups d'immobles
+          categoryPercentage: 0.7,
+          barPercentage: 0.8,
+        }
+      }
+    }
+  });
+}
+
+// ─── EXPORT ──────────────────────────────────────────────────────────────────
 function exportCSV(){
   const lines=['TIPO;ID;DATOS'];
   D.inmuebles.forEach(x=>lines.push(`INMUEBLE;${x.id};${x.tipo}|${x.direccion}|${x.poblacion}|${x.estado}|${x.alquiler}|${x.precio_compra}`));
@@ -901,6 +1717,7 @@ function exportCSV(){
   showToast('✅ CSV exportado');
 }
 
+// ─── MODAL CLOSE ON BACKDROP ─────────────────────────────────────────────────
 document.querySelectorAll('.modal-bg').forEach(bg=>{
   bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); });
 });
