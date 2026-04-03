@@ -733,10 +733,9 @@ function showLogin(){
 function showApp(email){
   hideSplash();
   document.getElementById('authScreen').style.display='none';
-  // Deixem que el media query de desktop gestioni display:flex/block;
-  // simplement traiem el display:none
   const appEl = document.getElementById('appScreen');
-  appEl.style.display = '';   // reset → el CSS natiu pren el control
+  // En desktop el media query s'encarrega del flex; en mòbil cal block explícit
+  appEl.style.display = window.innerWidth >= 701 ? '' : 'block';
   document.getElementById('userEmail').textContent=email.split('@')[0];
   document.getElementById('avatarInitial').textContent=(email[0]||'?').toUpperCase();
 }
