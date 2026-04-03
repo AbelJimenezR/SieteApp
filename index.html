@@ -257,8 +257,7 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
 .filter-search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .filter-search{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--br);border-radius:10px;font:13px system-ui;background:#fff;color:var(--tx);outline:none}
 .filter-search:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(23,103,209,.1)}
-.filter-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-.filter-chips::-webkit-scrollbar{display:none}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:2px}
 .chip{border:1px solid var(--br);background:#fff;color:var(--mu);border-radius:999px;padding:5px 12px;font:600 12px system-ui;cursor:pointer;white-space:nowrap;transition:all .15s}
 .chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
 .filter-count{font-size:11px;color:var(--mu);margin-bottom:6px}
