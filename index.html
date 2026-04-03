@@ -271,6 +271,21 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
 .chart-range button.on{background:var(--pri);border-color:var(--pri);color:#fff}
 .chart-wrap{position:relative;height:200px}
 
+/* AJUDA */
+.help-modal{max-width:680px}
+.help-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;background:#f8fafc;border-radius:12px;padding:4px}
+.help-tab{flex:1;min-width:fit-content;border:none;background:transparent;color:var(--mu);padding:7px 10px;border-radius:9px;font:600 11px system-ui;cursor:pointer;white-space:nowrap;transition:all .15s}
+.help-tab.on{background:#fff;color:var(--pri);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.help-section{display:none}
+.help-section.on{display:block}
+.help-section h4{font-size:13px;font-weight:800;color:var(--tx);margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--br)}
+.help-section h4:first-child{margin-top:0}
+.help-section p{font-size:13px;color:var(--mu);margin:0 0 8px;line-height:1.6}
+.help-section ul{margin:4px 0 10px;padding-left:18px}
+.help-section ul li{font-size:13px;color:var(--mu);margin-bottom:4px;line-height:1.5}
+.help-section ul li b{color:var(--tx)}
+.help-tip{background:#eef4ff;border-left:3px solid var(--pri);border-radius:0 8px 8px 0;padding:8px 12px;margin:10px 0;font-size:12px;color:#1d4ed8}
+
 /* DOCUMENTS */
 .doc-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9}
 .doc-item:last-child{border-bottom:none}
@@ -351,10 +366,13 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
           <div class="hlogo">🏠 InmoApp</div>
           <div class="hsub" id="headerSub">Gestión de inmuebles y alquileres</div>
         </div>
-        <div class="user-chip" onclick="doLogout()">
-          <div class="avatar" id="avatarInitial">?</div>
-          <span id="userEmail">—</span>
-          <span style="opacity:.5;margin-left:2px">✕</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="openModal('ayuda')" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font:700 14px system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Ayuda">?</button>
+          <div class="user-chip" onclick="doLogout()">
+            <div class="avatar" id="avatarInitial">?</div>
+            <span id="userEmail">—</span>
+            <span style="opacity:.5;margin-left:2px">✕</span>
+          </div>
         </div>
       </div>
       <div class="hbtns">
@@ -665,6 +683,131 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
   </div>
 </div>
 
+<!-- MODAL AYUDA -->
+<div class="modal-bg" id="modalAyuda">
+  <div class="modal help-modal">
+    <div class="modal-handle"></div>
+    <h3>❓ Ayuda — InmoApp</h3>
+    <div class="help-tabs">
+      <button class="help-tab on" onclick="helpTab('general',this)">General</button>
+      <button class="help-tab" onclick="helpTab('inmuebles',this)">Inmuebles</button>
+      <button class="help-tab" onclick="helpTab('inquilinos',this)">Inquilinos</button>
+      <button class="help-tab" onclick="helpTab('cobros',this)">Cobros</button>
+      <button class="help-tab" onclick="helpTab('gastos',this)">Gastos</button>
+      <button class="help-tab" onclick="helpTab('docs',this)">Documentos</button>
+    </div>
+
+    <!-- GENERAL -->
+    <div class="help-section on" id="help-general">
+      <h4>🏠 ¿Qué es InmoApp?</h4>
+      <p>InmoApp es una aplicación para gestionar tus inmuebles en alquiler: propiedades, inquilinos, cobros y gastos, todo en un solo lugar.</p>
+      <h4>🔝 Barra de acciones</h4>
+      <ul>
+        <li><b>🏢 Inmueble</b> — Añade una nueva propiedad.</li>
+        <li><b>👤 Inquilino</b> — Añade un nuevo inquilino.</li>
+        <li><b>💰 Cobro</b> — Registra un cobro manualmente.</li>
+        <li><b>🔧 Gasto</b> — Registra un gasto.</li>
+        <li><b>⚡ Generar cobros</b> — Crea automáticamente todos los cobros del mes actual para los inquilinos activos. Detecta duplicados.</li>
+        <li><b>📤 Exportar</b> — Descarga todos los datos en CSV.</li>
+      </ul>
+      <h4>📊 Resumen</h4>
+      <p>La página principal muestra 6 KPIs (valor cartera, renta mensual, total cobrado, beneficio neto, gastos y pendiente de cobro) y dos gráficos: evolución mensual y rendibilidad por inmueble. Usa los botones 6m / 12m / Todo para cambiar el período.</p>
+      <h4>🔔 Alertas</h4>
+      <p>Muestra todos los cobros en estado Pendiente o Retrasado. Revísala periódicamente para detectar impagos.</p>
+      <div class="help-tip">💡 Empieza siempre creando los inmuebles antes de añadir inquilinos o cobros.</div>
+    </div>
+
+    <!-- INMUEBLES -->
+    <div class="help-section" id="help-inmuebles">
+      <h4>➕ Añadir un inmueble</h4>
+      <p>Pulsa <b>🏢 Inmueble</b> en la barra superior. Rellena tipo, estado, dirección, población, alquiler mensual y precio de compra.</p>
+      <h4>⚙️ Gestionar tipos</h4>
+      <p>Dentro del formulario de nuevo inmueble, el botón <b>⚙️ Tipos</b> permite añadir categorías personalizadas con emoji propio y eliminar las existentes. Los 5 tipos predeterminados se crean automáticamente la primera vez.</p>
+      <h4>🔍 Filtros</h4>
+      <ul>
+        <li><b>Texto</b> — busca por dirección o población.</li>
+        <li><b>Estado</b> — Todos, Disponible o Alquilado.</li>
+        <li><b>Tipo</b> — filtra por categoría.</li>
+      </ul>
+      <h4>📎 Documentos</h4>
+      <p>Cada inmueble puede tener archivos adjuntos (escrituras, fotografías, etc.). Pulsa <b>📎 Docs</b> en la tarjeta.</p>
+      <div class="help-tip">💡 El precio de compra se usa para calcular la rentabilidad en los gráficos.</div>
+    </div>
+
+    <!-- INQUILINOS -->
+    <div class="help-section" id="help-inquilinos">
+      <h4>➕ Añadir un inquilino</h4>
+      <p>Pulsa <b>👤 Inquilino</b>. Rellena nombre, teléfono, email, inmueble asignado, renta mensual y fecha de inicio.</p>
+      <h4>📞 Contacto rápido</h4>
+      <ul>
+        <li><b>📞 Llamar</b> — abre la marcación.</li>
+        <li><b>💬 WhatsApp</b> — abre chat con mensaje predefinido.</li>
+        <li><b>✉ Email</b> — abre el correo con asunto predefinido.</li>
+      </ul>
+      <h4>🔴 Dar de baja</h4>
+      <p>En lugar de eliminar, usa <b>🔴 Dar de baja</b> para conservar el historial. Puedes reactivar con <b>♻️ Reactivar</b>.</p>
+      <h4>🔍 Filtros</h4>
+      <ul>
+        <li><b>Texto</b> — nombre, teléfono o email.</li>
+        <li><b>Inmueble</b> — filtra por propiedad.</li>
+        <li><b>Estado</b> — Vigentes (defecto), Todos o Bajas.</li>
+      </ul>
+      <div class="help-tip">💡 Los inquilinos en baja no se muestran por defecto ni se incluyen al generar cobros.</div>
+    </div>
+
+    <!-- COBROS -->
+    <div class="help-section" id="help-cobros">
+      <h4>⚡ Generar cobros automáticamente</h4>
+      <p>El botón <b>⚡ Generar cobros</b> crea de una vez todos los cobros del mes actual para inquilinos activos con su renta. No crea duplicados si ya existen.</p>
+      <div class="help-tip">💡 Úsalo al inicio de cada mes.</div>
+      <h4>✅ Marcar como pagado</h4>
+      <p>Pulsa el botón <b>Pagar</b> en la fila del cobro para marcarlo como Pagado. Vuelve a pulsarlo para revertirlo a Pendiente.</p>
+      <h4>🔍 Filtros</h4>
+      <ul>
+        <li><b>Inmueble</b> — filtra por propiedad.</li>
+        <li><b>Desde / Hasta</b> — rango de meses. Por defecto muestra el año en curso. El botón ✕ limpia el rango.</li>
+        <li><b>Estado</b> — Todos, Pendiente, Pagado o Retrasado.</li>
+      </ul>
+      <p>El contador muestra el número de cobros y el importe total filtrado.</p>
+    </div>
+
+    <!-- GASTOS -->
+    <div class="help-section" id="help-gastos">
+      <h4>➕ Añadir un gasto</h4>
+      <p>Pulsa <b>🔧 Gasto</b>. Rellena inmueble, fecha, concepto, importe y categoría (Reparación, IBI, Seguro, Comunidad u Otros).</p>
+      <h4>🔍 Filtros</h4>
+      <ul>
+        <li><b>Texto</b> — busca por concepto.</li>
+        <li><b>Inmueble</b> — filtra por propiedad.</li>
+        <li><b>Desde / Hasta</b> — rango de fechas por mes.</li>
+        <li><b>Categoría</b> — filtra por tipo de gasto.</li>
+      </ul>
+      <p>El contador muestra el número de gastos y el total en euros.</p>
+      <h4>📎 Documentos</h4>
+      <p>Adjunta facturas o recibos a cada gasto con el botón <b>📎</b> de la fila.</p>
+      <div class="help-tip">💡 Los gastos se descuentan de los cobros para calcular el beneficio neto.</div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="help-section" id="help-docs">
+      <h4>📎 ¿Dónde están los documentos?</h4>
+      <p>Cada inmueble, inquilino y gasto puede tener archivos adjuntos. Accede con el botón <b>📎 Docs</b> en la tarjeta o fila correspondiente.</p>
+      <h4>⬆️ Subir archivos</h4>
+      <p>Haz clic en la zona punteada del modal para seleccionar uno o varios archivos. Acepta cualquier formato: PDF, imágenes, Word, Excel, ZIP, etc. La barra de progreso indica el estado de la subida.</p>
+      <h4>⬇️ Descargar y eliminar</h4>
+      <ul>
+        <li><b>⬇</b> — descarga el archivo.</li>
+        <li><b>🗑</b> — elimina el archivo permanentemente.</li>
+      </ul>
+      <div class="help-tip">💡 Los archivos son privados: solo tú puedes acceder a ellos.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel" onclick="closeModal('modalAyuda')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DOCUMENTS -->
 <div class="modal-bg" id="modalDocuments">
   <div class="modal">
@@ -683,6 +826,21 @@ label{font-size:11px;font-weight:800;color:var(--mu);display:block;margin:0 0 4p
     <div class="modal-footer">
       <button class="cancel" onclick="closeModal('modalDocuments')">Cerrar</button>
     </div>
+  </div>
+</div>
+
+<!-- BANNER BROMA -->
+<div id="bannerPago" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease">
+    <div style="font-size:52px;margin-bottom:12px">💸</div>
+    <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;color:#1a2535">Período de prueba finalizado</h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7a90;line-height:1.6">Has utilizado InmoApp durante <b>5 accesos</b>.<br>Para continuar usando la aplicación debes abonar la licencia:</p>
+    <div style="background:#f0f4f8;border-radius:14px;padding:16px;margin-bottom:24px">
+      <div style="font-size:36px;font-weight:900;color:#1767d1">3.500,00 €</div>
+      <div style="font-size:12px;color:#6b7a90;margin-top:4px">Licencia perpetua · IVA incluido</div>
+    </div>
+    <button onclick="document.getElementById('bannerPago').style.display='none'" style="width:100%;padding:14px;border:none;border-radius:12px;background:#1767d1;color:#fff;font:800 15px system-ui;cursor:pointer">Aceptar y continuar →</button>
+    <p style="margin:12px 0 0;font-size:11px;color:#aab">Al pulsar aceptas los términos y condiciones del universo conocido</p>
   </div>
 </div>
 
@@ -733,10 +891,16 @@ function showApp(email){
   hideSplash();
   document.getElementById('authScreen').style.display='none';
   const appEl = document.getElementById('appScreen');
-  // En desktop el media query s'encarrega del flex; en mòbil cal block explícit
   appEl.style.display = window.innerWidth >= 701 ? '' : 'block';
   document.getElementById('userEmail').textContent=email.split('@')[0];
   document.getElementById('avatarInitial').textContent=(email[0]||'?').toUpperCase();
+
+  // Comptador d'accessos per a la broma
+  const accessos = parseInt(localStorage.getItem('inmo_accessos')||'0') + 1;
+  localStorage.setItem('inmo_accessos', accessos);
+  if(accessos === 5){
+    setTimeout(()=>{ document.getElementById('bannerPago').style.display='flex'; }, 1500);
+  }
 }
 
 function switchTab(tab){
@@ -1341,8 +1505,21 @@ function openModal(tipo){
     document.getElementById('cat-nombre').value='';
     document.getElementById('modalCategorias').classList.add('open');
   }
+  if(tipo==='ayuda'){
+    // Reset a la primera pestanya
+    helpTab('general', document.querySelector('.help-tab'));
+    document.getElementById('modalAyuda').classList.add('open');
+  }
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function helpTab(section, btn){
+  document.querySelectorAll('.help-tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.help-section').forEach(s=>s.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const el = document.getElementById('help-'+section);
+  if(el) el.classList.add('on');
+}
 
 // ─── SAVE ────────────────────────────────────────────────────────────────────
 async function saveInmueble(){
