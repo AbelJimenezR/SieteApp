@@ -193,8 +193,21 @@ function _buildCobroRow(c) {
 
   return `
     <tr class="${rowCls}">
-      <td><b>${im?.direccion || '-'}</b></td>
-      <td>${inq?.nombre || '—'}</td>
+      <td style="cursor:pointer" onclick="goToInmueble(${im?.id})">
+        <span style="display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;border:1px solid #e2e8f0;
+               border-radius:999px;padding:3px 10px 3px 8px;font:700 12px system-ui;color:#1a2535">
+          🏠 ${im?.direccion || '-'}
+        </span>
+      </td>
+      <td style="cursor:pointer" onclick="goToInquilino(${inq?.id})">
+        ${inq ? `<span style="display:inline-flex;align-items:center;gap:5px;background:#eef4ff;border:1px solid #c7d9f8;
+               border-radius:999px;padding:3px 10px 3px 6px;font:600 12px system-ui;color:#1767d1">
+          <span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#1767d1,#6366f1);
+                       display:inline-flex;align-items:center;justify-content:center;font-size:9px;
+                       font-weight:900;color:#fff;flex-shrink:0">${inq.nombre[0].toUpperCase()}</span>
+          ${inq.nombre}
+        </span>` : '—'}
+      </td>
       <td>${fmtMes(c.mes)}</td>
       <td><b>${euro(c.importe)}</b></td>
       <td style="color:var(--mu);font-size:12px">${c.fecha_pago || '—'}</td>
