@@ -17,7 +17,6 @@ function openModal(tipo) {
         document.getElementById(id).value = '';
       });
       document.getElementById('f_estado').value = 'Disponible';
-      document.getElementById('btnParticion').style.display = 'none';
       document.querySelector('#modalInmueble h3').textContent = '🏢 Nuevo inmueble';
       document.getElementById('modalInmueble').classList.add('open');
       break;

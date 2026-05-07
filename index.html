@@ -15,6 +15,15 @@
   <!-- CDN libs al head: bloquejants, garantit que carreguen abans de tot -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.init({
+        appId: "",
+      });
+    });
+  </script>
 </head>
 <body>
 
@@ -373,7 +382,7 @@
 </div>
 
 <!-- Modal: Contrato -->
-<div class="modal-bg" id="modalContrato">
+<div class="modal-bg centered" id="modalContrato">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>📋 Nuevo contrato</h3>
@@ -397,7 +406,7 @@
 </div>
 
 <!-- Modal: Inmueble -->
-<div class="modal-bg" id="modalInmueble">
+<div class="modal-bg centered" id="modalInmueble">
   <div class="modal">
     <div class="modal-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -426,7 +435,7 @@
 </div>
 
 <!-- Modal: Partición -->
-<div class="modal-bg" id="modalParticion">
+<div class="modal-bg centered" id="modalParticion">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3 style="margin:0 0 16px">➕ Crear partición</h3>
@@ -443,7 +452,7 @@
 </div>
 
 <!-- Modal: Inquilino -->
-<div class="modal-bg" id="modalInquilino">
+<div class="modal-bg centered" id="modalInquilino">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>👤 Nuevo inquilino</h3>
@@ -460,7 +469,7 @@
 </div>
 
 <!-- Modal: Cobro -->
-<div class="modal-bg" id="modalCobro">
+<div class="modal-bg centered" id="modalCobro">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>💰 Nuevo cobro</h3>
@@ -479,7 +488,7 @@
 </div>
 
 <!-- Modal: Gasto -->
-<div class="modal-bg" id="modalGasto">
+<div class="modal-bg centered" id="modalGasto">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>🔧 Nuevo gasto</h3>
@@ -503,7 +512,7 @@
 </div>
 
 <!-- Modal: Categories -->
-<div class="modal-bg" id="modalCategorias">
+<div class="modal-bg centered" id="modalCategorias">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>⚙️ Tipos de inmueble</h3>
@@ -520,7 +529,7 @@
 </div>
 
 <!-- Modal: Ajuda -->
-<div class="modal-bg" id="modalAyuda">
+<div class="modal-bg centered" id="modalAyuda">
   <div class="modal help-modal">
     <div class="modal-handle"></div>
     <h3>❓ Ayuda — InmoApp</h3>
@@ -631,7 +640,7 @@
 </div>
 
 <!-- Modal: Documents -->
-<div class="modal-bg" id="modalDocuments">
+<div class="modal-bg centered" id="modalDocuments">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3 id="doc-modal-title">📎 Documentos</h3>
@@ -653,7 +662,7 @@
 </div>
 
 <!-- Modal: Generar cobros -->
-<div class="modal-bg" id="modalGenerar">
+<div class="modal-bg centered" id="modalGenerar">
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>⚡ Generar cobros</h3>
@@ -681,24 +690,7 @@
   </div>
 </div>
 
-<!-- Banner broma -->
-<div id="bannerPago"
-     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease">
-    <div style="font-size:52px;margin-bottom:12px">💸</div>
-    <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;color:#1a2535">Período de prueba finalizado</h2>
-    <p style="margin:0 0 20px;font-size:14px;color:#6b7a90;line-height:1.6">Has utilizado InmoApp durante <b>5 accesos</b>.<br>Para continuar debes abonar la licencia:</p>
-    <div style="background:#f0f4f8;border-radius:14px;padding:16px;margin-bottom:24px">
-      <div style="font-size:36px;font-weight:900;color:#1767d1">3.500,00 €</div>
-      <div style="font-size:12px;color:#6b7a90;margin-top:4px">Licencia perpetua · IVA incluido</div>
-    </div>
-    <button onclick="document.getElementById('bannerPago').style.display='none'"
-            style="width:100%;padding:14px;border:none;border-radius:12px;background:#1767d1;color:#fff;font:800 15px system-ui;cursor:pointer">
-      Aceptar y continuar →
-    </button>
-    <p style="margin:12px 0 0;font-size:11px;color:#aab">Al pulsar aceptas los términos y condiciones del universo conocido</p>
-  </div>
-</div>
+
 
 <div class="toast" id="toast"></div>
 

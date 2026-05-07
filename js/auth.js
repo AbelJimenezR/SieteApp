@@ -19,13 +19,6 @@ function showApp(email) {
   appEl.style.display = window.innerWidth >= 701 ? '' : 'block';
   document.getElementById('userEmail').textContent    = email.split('@')[0];
   document.getElementById('avatarInitial').textContent = (email[0] || '?').toUpperCase();
-
-  // Comptador d'accessos (broma)
-  const accessos = parseInt(localStorage.getItem('inmo_accessos') || '0') + 1;
-  localStorage.setItem('inmo_accessos', accessos);
-  if (accessos === 5) {
-    setTimeout(() => { document.getElementById('bannerPago').style.display = 'flex'; }, 1500);
-  }
 }
 
 function showAuthMsg(msg, type = 'err') {
