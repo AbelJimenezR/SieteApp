@@ -289,37 +289,66 @@ function prefillImportCobro() {
 
 async function saveCobro() {
   const contratoId = parseInt(document.getElementById('c_contrato').value);
-  const mes        = document.getElementById('c_mes').value;
+  const mesDesde   = document.getElementById('c_mes').value;
+  const mesFins    = document.getElementById('c_mes_fins').value || mesDesde;
 
   if (!contratoId) return showToast('Selecciona un contrato');
-  if (!mes)        return showToast('Selecciona un mes');
+  if (!mesDesde)   return showToast('Selecciona un mes');
+  if (mesFins < mesDesde) return showToast('El mes hasta debe ser igual o posterior al mes desde');
 
-  // Comprovar duplicat (només en creació)
-  if (!editingId) {
-    const duplicat = D.cobros.find(c =>
-        Number(c.contrato_id) === contratoId && c.mes === mes
-    );
-    if (duplicat) return showToast(`Ya existe un cobro para este contrato en ${fmtMes(mes)}`);
+  const importe  = parseFloat(document.getElementById('c_importe').value) || 0;
+  const estado   = document.getElementById('c_estado').value;
+  const fechaPago = estado === 'Pagado' ? new Date().toISOString().slice(0, 10) : null;
+
+  // Generar llista de mesos del rang
+  const mesos = [];
+  let [any, mes] = mesDesde.split('-').map(Number);
+  const [anyFi, mesFi] = mesFins.split('-').map(Number);
+  while (any < anyFi || (any === anyFi && mes <= mesFi)) {
+    mesos.push(`${any}-${String(mes).padStart(2, '0')}`);
+    mes++;
+    if (mes > 12) { mes = 1; any++; }
   }
 
-  const row = {
-    contrato_id: contratoId,
-    mes,
-    importe:     parseFloat(document.getElementById('c_importe').value) || 0,
-    estado:      document.getElementById('c_estado').value,
-    fecha_pago:  document.getElementById('c_estado').value === 'Pagado'
-        ? new Date().toISOString().slice(0, 10) : null,
-  };
+  if (editingId) {
+    // Edició: actualitzar només el primer mes
+    const row = { contrato_id: contratoId, mes: mesDesde, importe, estado, fecha_pago: fechaPago };
+    const { error } = await sb.from('cobros').update(row).eq('id', editingId);
+    if (error) return showToast('Error: ' + error.message);
+    closeModal('modalCobro');
+    await loadAll();
+    return showToast('✅ Cobro actualizado');
+  }
 
-  const op = editingId
-      ? sb.from('cobros').update(row).eq('id', editingId)
-      : sb.from('cobros').insert(row);
-  const { error } = await op;
+  // Creació: filtrar duplicats
+  const duplicats = mesos.filter(m =>
+      D.cobros.find(c => Number(c.contrato_id) === contratoId && c.mes === m)
+  );
+  const nous = mesos.filter(m => !duplicats.includes(m));
+
+  if (!nous.length) {
+    return showToast(`Ya existen cobros para todos los meses seleccionados`);
+  }
+
+  const rows = nous.map(m => ({
+    contrato_id: contratoId,
+    mes:         m,
+    importe,
+    estado,
+    fecha_pago:  fechaPago,
+  }));
+
+  const { error } = await sb.from('cobros').insert(rows);
   if (error) return showToast('Error: ' + error.message);
 
   closeModal('modalCobro');
   await loadAll();
-  showToast(editingId ? '✅ Cobro actualizado' : '✅ Cobro guardado');
+
+  if (duplicats.length > 0) {
+    showToast(`✅ ${nous.length} cobro${nous.length !== 1 ? 's' : ''} creado${nous.length !== 1 ? 's' : ''}. ⚠️ ${duplicats.length} ya existían (${duplicats.map(fmtMes).join(', ')})`, 4000);
+  } else {
+    showToast(`✅ ${nous.length} cobro${nous.length !== 1 ? 's' : ''} creado${nous.length !== 1 ? 's' : ''}`);
+  }
 }
 
 // ─── TOGGLE PAGAT ────────────────────────────────────────────────────────────

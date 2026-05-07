@@ -17,6 +17,7 @@ function openModal(tipo) {
         document.getElementById(id).value = '';
       });
       document.getElementById('f_estado').value = 'Disponible';
+      // document.getElementById('btnParticion').style.display = 'none';
       document.querySelector('#modalInmueble h3').textContent = '🏢 Nuevo inmueble';
       document.getElementById('modalInmueble').classList.add('open');
       break;
@@ -44,6 +45,7 @@ function openModal(tipo) {
       if (!D.contratos.filter(c => c.activo).length) return showToast('Primero crea un contrato activo');
       renderSelectContratos();
       document.getElementById('c_mes').value     = ymActual;
+      document.getElementById('c_mes_fins').value = '';
       document.getElementById('c_importe').value = '';
       document.getElementById('c_estado').value  = 'Pendiente';
       document.querySelector('#modalCobro h3').textContent = '💰 Nuevo cobro';

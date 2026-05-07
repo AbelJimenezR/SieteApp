@@ -18,10 +18,13 @@
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.init({
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
         appId: "d1538cfc-77c1-4b8d-86ff-84b37c0f3856",
+        notifyButton: { enable: false },
+        allowLocalhostAsSecureOrigin: true,
       });
+      await OneSignal.Notifications.requestPermission();
     });
   </script>
 </head>
@@ -690,7 +693,24 @@
   </div>
 </div>
 
-
+<!-- Banner broma -->
+<div id="bannerPago"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease">
+    <div style="font-size:52px;margin-bottom:12px">💸</div>
+    <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;color:#1a2535">Período de prueba finalizado</h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7a90;line-height:1.6">Has utilizado InmoApp durante <b>5 accesos</b>.<br>Para continuar debes abonar la licencia:</p>
+    <div style="background:#f0f4f8;border-radius:14px;padding:16px;margin-bottom:24px">
+      <div style="font-size:36px;font-weight:900;color:#1767d1">3.500,00 €</div>
+      <div style="font-size:12px;color:#6b7a90;margin-top:4px">Licencia perpetua · IVA incluido</div>
+    </div>
+    <button onclick="document.getElementById('bannerPago').style.display='none'"
+            style="width:100%;padding:14px;border:none;border-radius:12px;background:#1767d1;color:#fff;font:800 15px system-ui;cursor:pointer">
+      Aceptar y continuar →
+    </button>
+    <p style="margin:12px 0 0;font-size:11px;color:#aab">Al pulsar aceptas los términos y condiciones del universo conocido</p>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
