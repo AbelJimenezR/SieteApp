@@ -92,18 +92,19 @@ function verificarAlertasAlInicio() {
     const im  = con ? getInm(con.inmueble_id)  : null;
     const inq = con ? getInq(con.inquilino_id) : null;
     return `
-      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#fff;
-                  border:1px solid #fecaca;border-radius:12px;margin-bottom:8px;">
-        <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:#dc2626"></div>
-        <div style="flex:1">
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:#fff;
+                border:1px solid #fecaca;border-radius:12px;margin-bottom:8px;">
+        <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:#dc2626;margin-top:4px"></div>
+        <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
             <button onclick="cerrarModalInicio();goToInmueble(${im?.id})"
               style="display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;border:1px solid #e2e8f0;
                      border-radius:999px;padding:3px 10px 3px 8px;cursor:pointer;font:700 12px system-ui;color:#1a2535">
               🏠 ${im?.direccion || 'Inmueble'}
             </button>
+            <span class="badge b-bad" style="font-size:9px">Retrasado</span>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             ${inq
         ? `<button onclick="cerrarModalInicio();goToInquilino(${inq.id})"
                   style="display:inline-flex;align-items:center;gap:5px;background:#eef4ff;border:1px solid #c7d9f8;
@@ -119,7 +120,6 @@ function verificarAlertasAlInicio() {
             <span style="color:#64748b;font-size:12px">${fmtMes(c.mes)} · ${euro(c.importe)}</span>
           </div>
         </div>
-        <span class="badge b-bad" style="font-size:9px">Retrasado</span>
       </div>`;
   }).join('');
 

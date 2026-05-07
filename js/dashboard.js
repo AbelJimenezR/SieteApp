@@ -92,12 +92,9 @@ function _renderDashCobros() {
       </div>
       <span style="font-size:12px;font-weight:700;color:#6b7a90;white-space:nowrap">${pagats}/${total} pagados</span>
     </div>
-    <div class="tcard"><table style="min-width:0">
-      <thead><tr>
-        <th>Inmueble</th><th>Inquilino</th><th>€</th><th>Estado</th><th></th>
-      </tr></thead>
-      <tbody>${cobros.map(c => _buildDashCobroRow(c)).join('')}</tbody>
-    </table></div>`;
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${cobros.map(c => _buildDashCobroRow(c)).join('')}
+    </div>`;
 }
 
 function _buildDashCobroRow(c) {
@@ -108,22 +105,28 @@ function _buildDashCobroRow(c) {
   const retr  = c.estado === 'Retrasado';
 
   const estatBadge = pagat
-      ? `<span class="badge b-ok">Pagado</span>`
-      : retr ? `<span class="badge b-bad">Retrasado</span>`
-          : `<span class="badge b-warn">Pendiente</span>`;
+      ? `<span class="badge b-ok" style="font-size:10px">Pagado</span>`
+      : retr ? `<span class="badge b-bad" style="font-size:10px">Retrasado</span>`
+          : `<span class="badge b-warn" style="font-size:10px">Pendiente</span>`;
 
   const cobrarBtn = pagat
-      ? `<button class="cob-btn-cobrar ja-pagat" onclick="toggleCobro(${c.id},'${c.estado}')">✓</button>`
-      : `<button class="cob-btn-cobrar"          onclick="toggleCobro(${c.id},'${c.estado}')">✅</button>`;
+      ? `<button class="cob-btn-cobrar ja-pagat" onclick="toggleCobro(${c.id},'${c.estado}')" style="padding:5px 10px;font-size:11px">✓ Pagado</button>`
+      : `<button class="cob-btn-cobrar" onclick="toggleCobro(${c.id},'${c.estado}')" style="padding:5px 10px;font-size:11px">✅ Cobrar</button>`;
 
   return `
-    <tr style="${pagat ? 'background:#f0fdf4' : retr ? 'background:#fff5f5' : ''}">
-      <td><b style="font-size:12px">${im?.direccion || '-'}</b></td>
-      <td style="font-size:12px">${inq?.nombre || '—'}</td>
-      <td><b>${euro(c.importe)}</b></td>
-      <td>${estatBadge}</td>
-      <td>${cobrarBtn}</td>
-    </tr>`;
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+                background:${pagat ? '#f0fdf4' : retr ? '#fff5f5' : '#fff'};
+                border:1px solid ${retr ? '#fecaca' : '#e2e8f0'}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${im?.direccion || '-'}</div>
+        <div style="font-size:11px;color:#6b7a90;margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          ${inq ? `<span>${inq.nombre}</span>` : ''}
+          <b style="color:#1a2535">${euro(c.importe)}</b>
+          ${estatBadge}
+        </div>
+      </div>
+      ${cobrarBtn}
+    </div>`;
 }
 
 function _renderDashInmuebles() {
